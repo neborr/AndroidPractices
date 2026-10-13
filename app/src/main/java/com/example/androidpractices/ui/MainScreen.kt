@@ -4,23 +4,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.example.androidpractices.data.remote.RetrofitClient
+import com.example.androidpractices.data.repository.LaunchRepositoryImpl
+import com.example.androidpractices.domain.usecase.GetLaunchByIdUseCase
+import com.example.androidpractices.domain.usecase.GetLaunchesUseCase
 import com.example.androidpractices.navigation.Screen
 import com.example.androidpractices.navigation.bottomNavItems
+import com.example.androidpractices.ui.detail.LaunchDetailViewModel
+import com.example.androidpractices.ui.launches.LaunchesViewModel
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
 
+    val repository = remember { LaunchRepositoryImpl(RetrofitClient.api) }
+    val getLaunchesUseCase = remember { GetLaunchesUseCase(repository) }
+    val getLaunchByIdUseCase = remember { GetLaunchByIdUseCase(repository) }
+
     Scaffold(
         bottomBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-x
+
             val showBottomBar = bottomNavItems.any { it.route == currentRoute }
 
             if (showBottomBar) {
@@ -55,7 +67,11 @@ x
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Launches.route) {
+                val launchesViewModel: LaunchesViewModel = viewModel(
+                    factory = LaunchesViewModel.Factory(getLaunchesUseCase)
+                )
                 LaunchesScreen(
+                    viewModel = launchesViewModel,
                     onLaunchClick = { launchId ->
                         navController.navigate(Screen.LaunchDetail.createRoute(launchId))
                     }
@@ -72,8 +88,12 @@ x
                 arguments = listOf(navArgument("launchId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val launchId = backStackEntry.arguments?.getString("launchId") ?: ""
+                val launchDetailViewModel: LaunchDetailViewModel = viewModel(
+                    factory = LaunchDetailViewModel.Factory(getLaunchByIdUseCase)
+                )
                 LaunchDetailScreen(
                     launchId = launchId,
+                    viewModel = launchDetailViewModel,
                     onBackClick = { navController.popBackStack() }
                 )
             }
