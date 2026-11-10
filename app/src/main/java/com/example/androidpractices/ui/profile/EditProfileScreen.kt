@@ -6,7 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
@@ -115,6 +117,7 @@ fun EditProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -170,12 +173,13 @@ fun EditProfileScreen(
             OutlinedTextField(
                 value = resumeUrl,
                 onValueChange = { viewModel.onResumeUrlChanged(it) },
-                label = { Text("URL резюме / портфолио (PDF)") },
+                label = { Text("Резюме (PDF)") },
+                placeholder = { Text("https://...") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
@@ -189,6 +193,8 @@ fun EditProfileScreen(
             ) {
                 Text("Готово", style = MaterialTheme.typography.titleMedium)
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
