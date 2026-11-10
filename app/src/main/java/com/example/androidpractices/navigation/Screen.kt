@@ -13,6 +13,8 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object Profile : Screen("profile", "Профиль", Icons.Default.Person)
     object Settings : Screen("settings", "Настройки", Icons.Default.Settings)
 
+    object EditProfile : Screen("edit_profile", "Редактирование профиля")
+
     object LaunchDetail : Screen("launch_detail/{launchId}", "Детали") {
         fun createRoute(launchId: String) = "launch_detail/$launchId"
     }

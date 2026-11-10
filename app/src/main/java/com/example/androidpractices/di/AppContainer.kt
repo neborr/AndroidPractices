@@ -1,6 +1,7 @@
 package com.example.androidpractices.di
 
 import android.content.Context
+import com.example.androidpractices.data.local.ProfileDataStore
 import com.example.androidpractices.data.local.SettingsDataStore
 import com.example.androidpractices.data.local.db.AppDatabase
 import com.example.androidpractices.data.local.db.LaunchDao
@@ -13,6 +14,7 @@ import com.example.androidpractices.domain.usecase.GetLaunchesUseCase
 
 interface AppContainer {
     val settingsDataStore: SettingsDataStore
+    val profileDataStore: ProfileDataStore
     val filterCache: FilterCache
     val launchDao: LaunchDao
     val launchRepository: LaunchRepository
@@ -24,6 +26,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val settingsDataStore: SettingsDataStore by lazy {
         SettingsDataStore(context)
+    }
+
+    override val profileDataStore: ProfileDataStore by lazy {
+        ProfileDataStore(context)
     }
 
     override val filterCache: FilterCache by lazy {

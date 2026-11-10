@@ -17,6 +17,10 @@ import com.example.androidpractices.ui.detail.LaunchDetailViewModel
 import com.example.androidpractices.ui.favorites.FavoritesScreen
 import com.example.androidpractices.ui.favorites.FavoritesViewModel
 import com.example.androidpractices.ui.launches.LaunchesViewModel
+import com.example.androidpractices.ui.profile.EditProfileScreen
+import com.example.androidpractices.ui.profile.EditProfileViewModel
+import com.example.androidpractices.ui.profile.ProfileScreen
+import com.example.androidpractices.ui.profile.ProfileViewModel
 import com.example.androidpractices.ui.settings.SettingsScreen
 import com.example.androidpractices.ui.settings.SettingsViewModel
 
@@ -105,7 +109,26 @@ fun MainScreen() {
                 )
             }
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                val profileViewModel: ProfileViewModel = viewModel(
+                    factory = ProfileViewModel.Factory(appContainer.profileDataStore)
+                )
+                ProfileScreen(
+                    viewModel = profileViewModel,
+                    onEditClick = {
+                        navController.navigate(Screen.EditProfile.route)
+                    }
+                )
+            }
+            composable(Screen.EditProfile.route) {
+                val editProfileViewModel: EditProfileViewModel = viewModel(
+                    factory = EditProfileViewModel.Factory(appContainer.profileDataStore)
+                )
+                EditProfileScreen(
+                    viewModel = editProfileViewModel,
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(Screen.Settings.route) {
                 val settingsViewModel: SettingsViewModel = viewModel(
