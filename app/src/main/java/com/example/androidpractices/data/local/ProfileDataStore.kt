@@ -17,6 +17,7 @@ class ProfileDataStore(private val context: Context) {
         val AVATAR_URI = stringPreferencesKey("avatar_uri")
         val RESUME_URL = stringPreferencesKey("resume_url")
         val POSITION = stringPreferencesKey("position")
+        val FAVORITE_CLASS_TIME = stringPreferencesKey("favorite_class_time")
     }
 
     val profileFlow: Flow<UserProfile> = context.profileDataStore.data
@@ -25,7 +26,8 @@ class ProfileDataStore(private val context: Context) {
                 fullName = preferences[PreferencesKeys.FULL_NAME] ?: "",
                 avatarUri = preferences[PreferencesKeys.AVATAR_URI],
                 resumeUrl = preferences[PreferencesKeys.RESUME_URL] ?: "",
-                position = preferences[PreferencesKeys.POSITION] ?: "Space Explorer & Developer"
+                position = preferences[PreferencesKeys.POSITION] ?: "Space Explorer & Developer",
+                favoriteClassTime = preferences[PreferencesKeys.FAVORITE_CLASS_TIME] ?: ""
             )
         }
 
@@ -39,6 +41,7 @@ class ProfileDataStore(private val context: Context) {
             }
             preferences[PreferencesKeys.RESUME_URL] = profile.resumeUrl
             preferences[PreferencesKeys.POSITION] = profile.position
+            preferences[PreferencesKeys.FAVORITE_CLASS_TIME] = profile.favoriteClassTime
         }
     }
 }

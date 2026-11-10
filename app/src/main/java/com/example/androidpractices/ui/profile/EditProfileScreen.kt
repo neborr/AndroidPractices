@@ -1,5 +1,6 @@
 package com.example.androidpractices.ui.profile
 
+import android.app.TimePickerDialog
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import java.io.File
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +44,12 @@ fun EditProfileScreen(
     val position by viewModel.position.collectAsState()
     val resumeUrl by viewModel.resumeUrl.collectAsState()
     val avatarUri by viewModel.avatarUri.collectAsState()
+    val favoriteClassTime by viewModel.favoriteClassTime.collectAsState()
 
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     var showSourceDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -59,6 +65,24 @@ fun EditProfileScreen(
         if (success) {
             tempCameraUri?.let { viewModel.onAvatarUriChanged(it.toString()) }
         }
+    }
+
+    if (showTimePicker) {
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = calendar.get(Calendar.MINUTE)
+
+        TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
+                viewModel.onFavoriteClassTimeChanged(formattedTime)
+            },
+            currentHour,
+            currentMinute,
+            true
+        ).show()
+        showTimePicker = false
     }
 
     if (showSourceDialog) {
@@ -193,13 +217,44 @@ fun EditProfileScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            val isTimeError = favoriteClassTime.isNotBlank() && !viewModel.isTimeValid
+
+            OutlinedTextField(
+                value = favoriteClassTime,
+                onValueChange = { viewModel.onFavoriteClassTimeChanged(it) },
+                label = { Text("Время любимой пары") },
+                placeholder = { Text("HH:mm") },
+                isError = isTimeError,
+                trailingIcon = {
+                    IconButton(onClick = { showTimePicker = true }) {
+                        Icon(imageVector = Icons.Default.Schedule, contentDescription = "Выбрать время")
+                    }
+                },
+                supportingText = {
+                    if (isTimeError) {
+                        Text(
+                            text = "Некорректный формат времени",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        keyboardController?.hide()
-                        viewModel.saveProfile {
-                            onBack()
+                        if (viewModel.isTimeValid) {
+                            keyboardController?.hide()
+                            viewModel.saveProfile(context) {
+                                onBack()
+                            }
                         }
                     }
                 )
@@ -210,10 +265,11 @@ fun EditProfileScreen(
             Button(
                 onClick = {
                     keyboardController?.hide()
-                    viewModel.saveProfile {
+                    viewModel.saveProfile(context) {
                         onBack()
                     }
                 },
+                enabled = viewModel.isTimeValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
