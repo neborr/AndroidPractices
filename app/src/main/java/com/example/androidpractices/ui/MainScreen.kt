@@ -2,31 +2,33 @@ package com.example.androidpractices.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.androidpractices.data.remote.RetrofitClient
-import com.example.androidpractices.data.repository.LaunchRepositoryImpl
-import com.example.androidpractices.domain.usecase.GetLaunchByIdUseCase
-import com.example.androidpractices.domain.usecase.GetLaunchesUseCase
+import com.example.androidpractices.AndroidPracticesApplication
 import com.example.androidpractices.navigation.Screen
 import com.example.androidpractices.navigation.bottomNavItems
 import com.example.androidpractices.ui.detail.LaunchDetailViewModel
+import com.example.androidpractices.ui.favorites.FavoritesScreen
+import com.example.androidpractices.ui.favorites.FavoritesViewModel
 import com.example.androidpractices.ui.launches.LaunchesViewModel
+import com.example.androidpractices.ui.settings.SettingsScreen
+import com.example.androidpractices.ui.settings.SettingsViewModel
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val appContainer = remember {
+        (context.applicationContext as AndroidPracticesApplication).container
+    }
 
-    val repository = remember { LaunchRepositoryImpl(RetrofitClient.api) }
-    val getLaunchesUseCase = remember { GetLaunchesUseCase(repository) }
-    val getLaunchByIdUseCase = remember { GetLaunchByIdUseCase(repository) }
+    val hasActiveFilters by appContainer.filterCache.hasActiveFilters.collectAsState()
 
     Scaffold(
         bottomBar = {
@@ -38,14 +40,23 @@ fun MainScreen() {
             if (showBottomBar) {
                 NavigationBar {
                     bottomNavItems.forEach { screen ->
+                        val isSelected = currentRoute == screen.route
                         NavigationBarItem(
                             icon = {
-                                screen.icon?.let {
-                                    Icon(imageVector = it, contentDescription = screen.title)
+                                BadgedBox(
+                                    badge = {
+                                        if (screen == Screen.Settings && hasActiveFilters) {
+                                            Badge { Text("·") }
+                                        }
+                                    }
+                                ) {
+                                    screen.icon?.let {
+                                        Icon(imageVector = it, contentDescription = screen.title)
+                                    }
                                 }
                             },
                             label = { Text(screen.title) },
-                            selected = currentRoute == screen.route,
+                            selected = isSelected,
                             onClick = {
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -68,10 +79,26 @@ fun MainScreen() {
         ) {
             composable(Screen.Launches.route) {
                 val launchesViewModel: LaunchesViewModel = viewModel(
-                    factory = LaunchesViewModel.Factory(getLaunchesUseCase)
+                    factory = LaunchesViewModel.Factory(
+                        appContainer.getLaunchesUseCase,
+                        appContainer.launchRepository,
+                        appContainer.settingsDataStore,
+                        appContainer.filterCache
+                    )
                 )
                 LaunchesScreen(
                     viewModel = launchesViewModel,
+                    onLaunchClick = { launchId ->
+                        navController.navigate(Screen.LaunchDetail.createRoute(launchId))
+                    }
+                )
+            }
+            composable(Screen.Favorites.route) {
+                val favoritesViewModel: FavoritesViewModel = viewModel(
+                    factory = FavoritesViewModel.Factory(appContainer.launchRepository)
+                )
+                FavoritesScreen(
+                    viewModel = favoritesViewModel,
                     onLaunchClick = { launchId ->
                         navController.navigate(Screen.LaunchDetail.createRoute(launchId))
                     }
@@ -81,7 +108,18 @@ fun MainScreen() {
                 ProfileScreen()
             }
             composable(Screen.Settings.route) {
-                SettingsScreen()
+                val settingsViewModel: SettingsViewModel = viewModel(
+                    factory = SettingsViewModel.Factory(
+                        appContainer.settingsDataStore,
+                        appContainer.filterCache
+                    )
+                )
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onDone = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(
                 route = Screen.LaunchDetail.route,
@@ -89,7 +127,10 @@ fun MainScreen() {
             ) { backStackEntry ->
                 val launchId = backStackEntry.arguments?.getString("launchId") ?: ""
                 val launchDetailViewModel: LaunchDetailViewModel = viewModel(
-                    factory = LaunchDetailViewModel.Factory(getLaunchByIdUseCase)
+                    factory = LaunchDetailViewModel.Factory(
+                        appContainer.getLaunchByIdUseCase,
+                        appContainer.launchRepository
+                    )
                 )
                 LaunchDetailScreen(
                     launchId = launchId,

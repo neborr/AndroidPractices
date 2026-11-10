@@ -6,8 +6,9 @@ import com.example.androidpractices.domain.repository.LaunchRepository
 class GetLaunchesUseCase(
     private val repository: LaunchRepository
 ) {
-    suspend operator fun invoke(query: String = ""): List<Launch> {
-        val launches = repository.fetchLaunches()
+    suspend operator fun invoke(query: String = "", limit: Int = 20): List<Launch> {
+        val searchQuery = query.trim().ifEmpty { null }
+        val launches = repository.fetchLaunches(limit = limit, search = searchQuery)
         return if (query.isBlank()) {
             launches
         } else {

@@ -5,6 +5,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,6 +33,10 @@ fun LaunchDetailScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+    val favorites by viewModel.favoritesFlow.collectAsState()
+
+    val launch = (uiState as? UiState.Success)?.data
+    val isFavorite = launch != null && favorites.any { it.id == launch.id }
 
     Scaffold(
         topBar = {
@@ -45,6 +51,15 @@ fun LaunchDetailScreen(
                     }
                 },
                 actions = {
+                    if (launch != null) {
+                        IconButton(onClick = { viewModel.toggleFavorite(launch) }) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Избранное",
+                                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                     IconButton(onClick = { viewModel.loadLaunchDetail(launchId) }) {
                         Icon(imageVector = Icons.Default.Refresh, contentDescription = "Обновить")
                     }
@@ -108,7 +123,7 @@ fun LaunchDetailScreen(
             }
 
             is UiState.Success -> {
-                val launch = state.data
+                val launchData = state.data
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -116,7 +131,7 @@ fun LaunchDetailScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    if (!launch.imageUrl.isNullOrBlank()) {
+                    if (!launchData.imageUrl.isNullOrBlank()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -124,8 +139,8 @@ fun LaunchDetailScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             AsyncImage(
-                                model = launch.imageUrl,
-                                contentDescription = launch.name,
+                                model = launchData.imageUrl,
+                                contentDescription = launchData.name,
                                 modifier = Modifier.fillMaxHeight()
                             )
                         }
@@ -133,7 +148,7 @@ fun LaunchDetailScreen(
                     }
 
                     Text(
-                        text = launch.name,
+                        text = launchData.name,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -146,7 +161,7 @@ fun LaunchDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Провайдер: ${launch.provider}",
+                            text = "Провайдер: ${launchData.provider}",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Surface(
@@ -154,7 +169,7 @@ fun LaunchDetailScreen(
                             shape = MaterialTheme.shapes.small
                         ) {
                             Text(
-                                text = launch.status,
+                                text = launchData.status,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelMedium
                             )
@@ -164,21 +179,21 @@ fun LaunchDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Время: ${launch.windowStart}",
+                        text = "Время: ${launchData.windowStart}",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Ракета ID: ${launch.rocketName}",
+                        text = "Ракета ID: ${launchData.rocketName}",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Площадка ID: ${launch.location}",
+                        text = "Площадка ID: ${launchData.location}",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
@@ -195,7 +210,7 @@ fun LaunchDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = launch.description,
+                        text = launchData.description,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

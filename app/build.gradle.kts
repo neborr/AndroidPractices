@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -15,6 +18,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ksp {
+            arg("room.generateKotlin", "true")
+        }
     }
 
     buildTypes {
@@ -27,7 +34,6 @@ android {
         }
     }
 
-    // Обновлено до Java 17 (рекомендуется для Android 14 и выше)
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -40,7 +46,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -77,6 +83,17 @@ dependencies {
 
     // ViewModel Lifecycle Scope
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // DataStore Preferences
+    implementation(libs.datastore.preferences)
+
+    // Room Database
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    // Gson для сериализации
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Тестирование
     testImplementation("junit:junit:4.13.2")
