@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml:2:13-83
+INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml:2:13-83
+	package
+		INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml
+	xmlns:android
+		ADDED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml:2:23-81
+uses-sdk
+INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml reason: use-sdk injection requested
+INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml
+INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml
+	android:targetSdkVersion
+		INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml
+	android:minSdkVersion
+		INJECTED from N:\AndroidPractices\feature\profile\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest18104960185443183225.xml

@@ -1,0 +1,100 @@
+package com.example.androidpractices.feature.profile.ui
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.androidpractices.feature.profile.data.local.ProfileDataStore
+import com.example.androidpractices.feature.profile.data.local.alarm.AlarmScheduler
+import com.example.androidpractices.feature.profile.domain.model.UserProfile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+
+class EditProfileViewModel(
+    private val profileDataStore: ProfileDataStore
+) : ViewModel() {
+
+    private val _fullName = MutableStateFlow("")
+    val fullName: StateFlow<String> = _fullName.asStateFlow()
+
+    private val _position = MutableStateFlow("")
+    val position: StateFlow<String> = _position.asStateFlow()
+
+    private val _resumeUrl = MutableStateFlow("")
+    val resumeUrl: StateFlow<String> = _resumeUrl.asStateFlow()
+
+    private val _avatarUri = MutableStateFlow<String?>(null)
+    val avatarUri: StateFlow<String?> = _avatarUri.asStateFlow()
+
+    private val _favoriteClassTime = MutableStateFlow("")
+    val favoriteClassTime: StateFlow<String> = _favoriteClassTime.asStateFlow()
+
+    private val timeRegex = Regex("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
+
+    val isTimeValid: Boolean
+        get() {
+            val time = _favoriteClassTime.value.trim()
+            return time.isNotEmpty() && timeRegex.matches(time)
+        }
+
+    init {
+        viewModelScope.launch {
+            val profile = profileDataStore.profileFlow.first()
+            _fullName.value = profile.fullName
+            _position.value = profile.position
+            _resumeUrl.value = profile.resumeUrl
+            _avatarUri.value = profile.avatarUri
+            _favoriteClassTime.value = profile.favoriteClassTime
+        }
+    }
+
+    fun onFullNameChanged(name: String) {
+        _fullName.value = name
+    }
+
+    fun onPositionChanged(pos: String) {
+        _position.value = pos
+    }
+
+    fun onResumeUrlChanged(url: String) {
+        _resumeUrl.value = url
+    }
+
+    fun onAvatarUriChanged(uri: String?) {
+        _avatarUri.value = uri
+    }
+
+    fun onFavoriteClassTimeChanged(time: String) {
+        _favoriteClassTime.value = time
+    }
+
+    fun saveProfile(context: Context, onSaved: () -> Unit) {
+        if (!isTimeValid) return
+        viewModelScope.launch {
+            val updated = UserProfile(
+                fullName = _fullName.value,
+                position = _position.value,
+                resumeUrl = _resumeUrl.value,
+                avatarUri = _avatarUri.value,
+                favoriteClassTime = _favoriteClassTime.value
+            )
+            profileDataStore.saveProfile(updated)
+
+            AlarmScheduler.scheduleAlarm(context, _favoriteClassTime.value, _fullName.value.ifBlank { "Студент" })
+
+            onSaved()
+        }
+    }
+
+    class Factory(
+        private val profileDataStore: ProfileDataStore
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return EditProfileViewModel(profileDataStore) as T
+        }
+    }
+}
