@@ -1,7 +1,6 @@
 package com.example.androidpractices.di
 
 import android.content.Context
-import com.example.androidpractices.data.local.ProfileDataStore
 import com.example.androidpractices.data.local.SettingsDataStore
 import com.example.androidpractices.data.local.db.AppDatabase
 import com.example.androidpractices.data.local.db.LaunchDao
@@ -11,6 +10,7 @@ import com.example.androidpractices.data.repository.LaunchRepositoryImpl
 import com.example.androidpractices.domain.repository.LaunchRepository
 import com.example.androidpractices.domain.usecase.GetLaunchByIdUseCase
 import com.example.androidpractices.domain.usecase.GetLaunchesUseCase
+import com.example.androidpractices.feature.profile.data.local.ProfileDataStore
 
 interface AppContainer {
     val settingsDataStore: SettingsDataStore

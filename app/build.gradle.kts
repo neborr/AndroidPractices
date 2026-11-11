@@ -87,6 +87,9 @@ dependencies {
     // DataStore Preferences
     implementation(libs.datastore.preferences)
 
+    // Feature Profile Module
+    implementation(project(":feature:profile"))
+
     // Room Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

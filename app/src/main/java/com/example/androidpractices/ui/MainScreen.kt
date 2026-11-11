@@ -11,16 +11,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.androidpractices.AndroidPracticesApplication
+import com.example.androidpractices.feature.profile.ui.EditProfileScreen
+import com.example.androidpractices.feature.profile.ui.EditProfileViewModel
+import com.example.androidpractices.feature.profile.ui.ProfileScreen
+import com.example.androidpractices.feature.profile.ui.ProfileViewModel
 import com.example.androidpractices.navigation.Screen
 import com.example.androidpractices.navigation.bottomNavItems
 import com.example.androidpractices.ui.detail.LaunchDetailViewModel
 import com.example.androidpractices.ui.favorites.FavoritesScreen
 import com.example.androidpractices.ui.favorites.FavoritesViewModel
 import com.example.androidpractices.ui.launches.LaunchesViewModel
-import com.example.androidpractices.ui.profile.EditProfileScreen
-import com.example.androidpractices.ui.profile.EditProfileViewModel
-import com.example.androidpractices.ui.profile.ProfileScreen
-import com.example.androidpractices.ui.profile.ProfileViewModel
 import com.example.androidpractices.ui.settings.SettingsScreen
 import com.example.androidpractices.ui.settings.SettingsViewModel
 
